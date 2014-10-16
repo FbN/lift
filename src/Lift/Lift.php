@@ -1,0 +1,40 @@
+<?php
+
+namespace Lift;
+
+use Pimple\Container;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
+
+class Lift {
+	
+	static public function app(InputInterface $input, OutputInterface $output){
+		
+		$app = new Container();
+		
+		$app['in'] = $input;
+		
+		$app['out'] = $output;
+		
+		$app['configService'] =  function ($c) {
+			return new \Lift\Services\Config($c);
+		};
+		
+		$app['manifestService'] =  function ($c) {
+			return new \Lift\Services\Manifest($c);
+		};
+		
+		$app['config'] = function ($c) {
+			return $c['configService']->load();
+		};
+		
+// 		$app['manifest'] = function ($c) {
+// 			return $c['configService']->load();
+// 		};		
+		
+		return $app;
+		
+	}
+	
+}
