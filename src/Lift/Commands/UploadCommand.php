@@ -21,6 +21,11 @@ class UploadCommand extends LiftCommand
 				'H',
 				InputOption::VALUE_REQUIRED,
 				'Host name to upload.'
+		)->addOption(
+				'pretend',
+				'p',
+				InputOption::VALUE_NONE,
+				'Pretend, do nothing.'
 		);
 	}
 
@@ -28,7 +33,25 @@ class UploadCommand extends LiftCommand
 	{
 		
 		$app = $this->app;
-		$app['out']->writeln($app['config']['host']);
-
+		
+		$ftp = $app['ftpService'];
+		$indexService = $app['indexService'];
+		
+		$index = $indexService->getIndex();
+		
+		if(!$index) $index = [];
+		
+		$ftp->connect();
+		$index = $ftp->uploadDiff(
+				$index,
+				$indexService->diff($index),
+				$this
+			);		
+		
+		if(!$app['config']['pretend']) $indexService->persist($index);
+		
+		$ftp->close();
+		
+		$this->app['stats']->report();
 	}
 }

@@ -9,6 +9,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 abstract class LiftCommand extends Command
 {
 	
+	private $working = array(  '┏(^_^)┛', '┗(^_^﻿)┓', '┗(^_^)┛' , '┏(^_^)┓');
+	
 	private $lastH;
 	
 	protected $app;
@@ -21,19 +23,22 @@ abstract class LiftCommand extends Command
 	
 	abstract protected function exe();
 	
-	protected function writeln($t){
+	public function writeln($t){
 		$this->app['out']->writeln($t);
 	}
 	
-	protected function writeH1($t){
+	public function writeH1($t){
 		$t = '*** '.$t.' ***';
 		$this->app['out']->writeln("<question>$t</question>");
 		$this->lastH = 	$t;	
 	}
 	
-	protected function writeHR(){
+	public function writeHR(){
 		$this->app['out']->writeln("<info>".str_pad('', strlen($this->lastH), '*')."</info>\n");
 	}
 	
+	public function writeSpinning($now,$tot){		
+		$this->app['out']->write( "  ".$this->working[array_rand($this->working)]." ".round((100/$tot*$now),1)."%                          \r" );
+	}
 
 }

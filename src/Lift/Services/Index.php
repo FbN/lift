@@ -59,11 +59,12 @@ class Index extends Service {
 		$this->scan($root, function($rel) use ($root, &$index) {
 			$index[$rel] = [
 				"time" => filemtime($root.$rel),
-				"crc" => md5(file_get_contents($root.$rel))
+				"crc" => md5(file_get_contents($root.$rel)),
+				"size" => filesize($root.$rel)
 				];
 		});	
 
-	    file_put_contents($this->getPath(), json_encode($index, JSON_PRETTY_PRINT));
+	    $this->persist($index);
 		
 	    return $index;
 	}
@@ -82,22 +83,30 @@ class Index extends Service {
 		$diffs = array();
 	
 		$this->scan($root, function($rel) use ($root, $index, &$diffs, $stats) {
-			$crc = null;
+			$time = null;
+			$size = null;
+			$crc  = null;
 						
 			if(!isset($index[$rel]))
 			{
 				$stats->add(Stats::NEWENTRY);
-				$diffs[]=$rel;
+				$diffs[$rel]= [
+					"time" => filemtime($root.$rel),
+					"crc" => $crc?$crc:md5(file_get_contents($root.$rel)),
+					"size" => filesize($root.$rel)
+				];
 			}
 			elseif (
 				($index[$rel]['time'] != ($time=filemtime($root.$rel))) ||
+				($index[$rel]['size'] != ($size=filesize($root.$rel))) ||
 				($index[$rel]['crc']  != ($crc = md5(file_get_contents($root.$rel)))) 
 				)
 			{
 				$stats->add(Stats::CHANGED);
 				$diffs[$rel]= [
 					"time" => filemtime($root.$rel),
-					"crc" => $crc?$crc:md5(file_get_contents($root.$rel))
+					"crc" => $crc?$crc:md5(file_get_contents($root.$rel)),
+					"size" => filesize($root.$rel)
 				];
 			}
 			
@@ -115,6 +124,11 @@ class Index extends Service {
 	public function getIndex()
 	{	
 		return file_exists($this->getPath())?json_decode(file_get_contents($this->getPath()), true):null;
+	}
+	
+	public function persist($index)
+	{
+		return file_put_contents($this->getPath(), json_encode($index, JSON_PRETTY_PRINT));
 	}
 	
 	

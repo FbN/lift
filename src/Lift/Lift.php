@@ -25,6 +25,10 @@ class Lift {
 			return new \Lift\Services\Index($c);
 		};
 		
+		$app['ftpService'] =  function ($c) {
+			return new \Lift\Services\Ftp($c);
+		};
+		
 		$app['config'] = function ($c) {
 			return $c['configService']->load();
 		};

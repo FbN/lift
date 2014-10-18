@@ -7,6 +7,8 @@ class Stats extends Service {
 	const PROCESSED = 'processed';
 	const NEWENTRY = 'new entry';
 	const CHANGED = 'changed';
+	const UPLOADOK = 'uploaded';
+	const UPLOADKO = 'upload failed';
 	
 	protected $counters = [];
 	
