@@ -15,7 +15,7 @@ class ResetCommand extends LiftCommand
 	{
 		$this
 		->setName('reset')
-		->setDescription('reset local manifest from files')
+		->setDescription('reset local index from files')
 		->addOption(
 				'defaut-host',
 				'H',
@@ -26,6 +26,7 @@ class ResetCommand extends LiftCommand
 
 	protected function exe()
 	{
-		$this->app['manifestService']->localBuild();
+		$this->app['indexService']->localBuild();
+		$this->app['stats']->report();
 	}
 }

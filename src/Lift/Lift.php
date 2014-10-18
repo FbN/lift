@@ -21,12 +21,16 @@ class Lift {
 			return new \Lift\Services\Config($c);
 		};
 		
-		$app['manifestService'] =  function ($c) {
-			return new \Lift\Services\Manifest($c);
+		$app['indexService'] =  function ($c) {
+			return new \Lift\Services\Index($c);
 		};
 		
 		$app['config'] = function ($c) {
 			return $c['configService']->load();
+		};
+		
+		$app['stats'] =  function ($c) {
+			return new \Lift\Services\Stats($c);
 		};
 		
 // 		$app['manifest'] = function ($c) {

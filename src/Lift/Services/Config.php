@@ -33,6 +33,30 @@ class Config extends Service {
 		$config['root'] = getcwd();
 		
 		$config['host'] = isset($config['defaut-host'])?$config['hosts'][$config['defaut-host']]:current($config['hosts']);
+		
+		$config['ignorePatterns'] = [];
+		
+		// ignore patterns
+		
+		if(isset($config['ignore']))
+		{
+			foreach ($config['ignore'] as $pattern)
+			{
+				$s = '/';
+				$e = '/';
+				if($pattern[0]=='^')
+				{
+					$pattern = substr($pattern, 1);
+					$s = '/^';
+				}
+				if($pattern[strlen($pattern)-1]=='$')
+				{
+					$pattern = substr($pattern, 0, -1);
+					$e = '$/';
+				}
+				$config['ignorePatterns'][]=$s.preg_quote($pattern, '/').$e;
+			}
+		}
 	
 		return $config;
 	}
