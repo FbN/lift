@@ -69,6 +69,25 @@ class Index extends Service {
 	    return $index;
 	}
 	
+	public function remoteBuild()
+	{
+		$root = $this->app['config']['root'];
+		
+		$index = array();
+		
+		$this->scan($root, function($rel) use ($root, &$index) {
+			$index[$rel] = [
+				"time" => filemtime($root.$rel),
+				"crc" => md5(file_get_contents($root.$rel)),
+				"size" => filesize($root.$rel)
+				];
+		});	
+
+	    $this->persist($index);
+		
+	    return $index;
+	}	
+	
 	public function diff($index)
 	{
 

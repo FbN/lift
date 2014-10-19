@@ -5,3 +5,4 @@ vendor
 composer.phar
 composer.lock
 lift.lock
+lift.phar
