@@ -22,10 +22,20 @@ class UploadCommand extends LiftCommand
 				InputOption::VALUE_REQUIRED,
 				'Host name to upload.'
 		)->addOption(
+				'remote-reindex',
+				null,
+				InputOption::VALUE_NONE,
+				'Rebuild the index from remote host.'
+		)->addOption(
 				'pretend',
 				'p',
 				InputOption::VALUE_NONE,
 				'Pretend, do nothing.'
+		)->addOption(
+				'check-time',
+				null,
+				InputOption::VALUE_NONE,
+				'Lift compare files by md5 checksums. If you can trust your files modification time, you can speedup the upload. Can be used with check-size.'
 		);
 	}
 
@@ -33,11 +43,22 @@ class UploadCommand extends LiftCommand
 	{
 		
 		$app = $this->app;
+		$config = $app['config'];
 		
 		$ftp = $app['ftpService'];
 		$indexService = $app['indexService'];
+		$remoteService = $app['remoteService'];
 		
-		$index = $indexService->getIndex();
+		$index = [];
+		
+		if($config['remote-reindex']) {
+			$index = $remoteService->remoteReindex($this);
+			if(!$app['config']['pretend']){
+				$indexService->persist($remoteService->remoteReindex($this));
+			}	
+		} else {
+			$index = $indexService->getIndex();
+		}
 		
 		if(!$index) $index = [];
 		
@@ -54,4 +75,5 @@ class UploadCommand extends LiftCommand
 		
 		$this->app['stats']->report();
 	}
+	
 }

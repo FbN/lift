@@ -81,4 +81,31 @@ EOT;
 		return $script;
 	}
 	
+	public function remoteReindex($command){
+		$config = $this->app['config'];
+		$host   = $config['host'];
+		
+		$token = Remote::gen_uuid();
+		
+		$command->writeH1('Scan and rebuild index from '.$host['host']);
+		
+		$command->writeln(' build script');
+		$hosturi = 'ftp://'.$host['username'] . ":" . $host['password'] . "@" . $host['host'] . $host['folder'] . '/' . $host['remote-script-name'];
+		
+		$options = array('ftp' => array('overwrite' => true));
+		$stream = stream_context_create($options);
+		
+		$command->writeln(' publish script');
+		file_put_contents($hosturi, $this->assembleScript($token), 0, $stream);
+		
+		$command->writeln(' call remote script, this can take a while...');
+		
+		$index = json_decode( file_get_contents($host['url'].'/'.$host['remote-script-name'].'?token='.$token), true );
+		
+		$command->writeln( " blank script...");
+		file_put_contents($hosturi, '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Lift!</title></head><body>ˁ˚ᴥ˚ˀ</body><pre></pre></html>', 0, $stream);
+		
+		return $index;
+	}
+	
 }

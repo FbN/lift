@@ -101,7 +101,7 @@ class Index extends Service {
 	
 		$diffs = array();
 	
-		$this->scan($root, function($rel) use ($root, $index, &$diffs, $stats) {
+		$this->scan($root, function($rel) use ($root, $index, &$diffs, $stats, $config) {
 			$time = null;
 			$size = null;
 			$crc  = null;
@@ -116,9 +116,9 @@ class Index extends Service {
 				];
 			}
 			elseif (
-				($index[$rel]['time'] != ($time=filemtime($root.$rel))) ||
-				($index[$rel]['size'] != ($size=filesize($root.$rel))) ||
-				($index[$rel]['crc']  != ($crc = md5(file_get_contents($root.$rel)))) 
+ 				($index[$rel]['size'] != ($size=filesize($root.$rel))) ||
+				($config['check-time'] && ($index[$rel]['time'] != ($time=filemtime($root.$rel)))) ||
+				(!$config['check-time'] && ($index[$rel]['crc']  != ($crc = md5(file_get_contents($root.$rel))))) 
 				)
 			{
 				$stats->add(Stats::CHANGED);
