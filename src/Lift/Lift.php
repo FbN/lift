@@ -29,6 +29,10 @@ class Lift {
 			return new \Lift\Services\Ftp($c);
 		};
 		
+		$app['remoteService'] =  function ($c) {
+			return new \Lift\Services\Remote($c);
+		};
+		
 		$app['config'] = function ($c) {
 			return $c['configService']->load();
 		};

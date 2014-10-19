@@ -45,4 +45,5 @@ EOT;
 		$this->writeln('files packd: '.$phar->count());
 		$this->writeHR();
 	}
+	
 }
