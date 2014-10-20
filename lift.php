@@ -1,5 +1,7 @@
 <?php
 
+if(!defined('DEVICE')) define('DEVICE','');
+
 require 'vendor/autoload.php';
 
 use Symfony\Component\Console\Application;

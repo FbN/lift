@@ -12,7 +12,7 @@ class Remote extends Service {
 		];
 	
 	protected function scriptPart($src){
-		return "// === ".$src." === ".preg_replace('/^\<\?php.*\n/', "\n", file_get_contents($src));
+		return "// === ".$src." === ".preg_replace('/^\<\?php.*\n/', "\n", file_get_contents(DEVICE.$src));
 	}
 	
 	static function gen_uuid() {

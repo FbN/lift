@@ -13,6 +13,9 @@ class BuildCommand extends LiftCommand
 	
 	const STUB = <<<EOT
 <?php
+	define('DEVICE', 'phar://lift.phar/');
+	if(!file_exists('lift.json')) touch('lift.json');
+	if(!file_exists('lift.lock')) touch('lift.lock');
 	Phar::mapPhar();			
 	Phar::mount('lift.json', __DIR__ . '/lift.json');			
 	Phar::mount('lift.lock', __DIR__ . '/lift.lock');
@@ -38,7 +41,7 @@ EOT;
 			"lift.phar"
 			);
 		
-		$phar->buildFromDirectory("./",'/.php$/');
+		$phar->buildFromDirectory("./",'/\.php$/');
 		
 		$phar->setStub(self::STUB);		
 		$this->writeln('lift.phar');
