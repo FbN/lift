@@ -4,6 +4,11 @@ namespace Lift\Services;
 
 class Index extends Service {
 	
+	static public function unixPath($path) {
+		if(DIRECTORY_SEPARATOR=='/') return $path;
+		return str_replace(DIRECTORY_SEPARATOR, '/', $path);
+	}
+	
 	protected $file='lift.lock';
 	
 	protected function getPath(){
@@ -34,7 +39,7 @@ class Index extends Service {
 		$iterator->setFlags(\RecursiveDirectoryIterator::SKIP_DOTS);
 		foreach (new \RecursiveIteratorIterator($iterator) as $filename)
 		{
-			$rel = substr($filename, $l);
+			$rel = self::unixPath(substr($filename, $l));
 				
 			if($this->mustIgnore($rel))
 			{
