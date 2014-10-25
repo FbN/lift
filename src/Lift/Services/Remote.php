@@ -11,6 +11,8 @@ class Remote extends Service {
 		'src/Lift/Services/Stats.php'
 		];
 	
+	const BATCHSIZE = 10;
+	
 	protected function scriptPart($src){
 		return "// === ".$src." === ".preg_replace('/^\<\?php.*\n/', "\n", file_get_contents(DEVICE.$src));
 	}
@@ -106,6 +108,62 @@ EOT;
 		file_put_contents($hosturi, '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Lift!</title></head><body>ˁ˚ᴥ˚ˀ</body><pre></pre></html>', 0, $stream);
 		
 		return $index;
+	}
+	
+	protected function remoteBatchIndex($batch){
+		
+		$config = $this->app['config'];
+		$host   = $config['host'];
+		$hosturi = $host['url'].'/_r.php';
+
+		// Create the context for the request
+		$context = stream_context_create(array(
+				'http' => array(
+						// http://www.php.net/manual/en/context.http.php
+						'method' => 'POST',
+						'header'  => 'Content-type: application/json',
+						'content' => json_encode(array('files'=>$batch))
+				)
+		));
+		
+		// Send the request
+		$response = file_get_contents($hosturi, FALSE, $context);
+		
+		// Check for errors
+		if($response === FALSE){
+			throw new \RuntimeException('Error remote check');
+		}
+		
+		// Decode the response
+		$response = json_decode($response, true);
+		if($response['index']===null){
+			die(var_dump(json_encode(array('files'=>$batch))));
+		}
+		return $response['index'];
+	}
+	
+	public function remoteDiff($index){
+		
+		$config = $this->app['config'];
+		$stats = $this->app['stats'];
+		
+		$stats->reset(Stats::NEWENTRY);
+		$stats->reset(Stats::CHANGED);
+		
+		$batch = [];
+		$diffs = [];
+		$indexService = $this->app['indexService'];
+		foreach ($index as $f=>$vals){
+			$batch[$f]=$vals;
+			if(count($batch)>self::BATCHSIZE){				
+				$diffs = array_merge(
+						$diffs, 
+						$indexService->compare($batch, $this->remoteBatchIndex(array_keys($batch)))
+				);					
+				$batch=[];
+			}
+		}
+		return $diffs;
 	}
 	
 }

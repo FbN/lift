@@ -55,7 +55,7 @@ class Index extends Service {
 		
 	}
 		
-	public function localBuild()
+	public function localBuild($persist=true)
 	{
 		$root = $this->app['config']['root'];
 		
@@ -69,29 +69,10 @@ class Index extends Service {
 				];
 		});	
 
-	    $this->persist($index);
+	    if($persist) $this->persist($index);
 		
 	    return $index;
 	}
-	
-	public function remoteBuild()
-	{
-		$root = $this->app['config']['root'];
-		
-		$index = array();
-		
-		$this->scan($root, function($rel) use ($root, &$index) {
-			$index[$rel] = [
-				"time" => filemtime($root.$rel),
-				"crc" => md5(file_get_contents($root.$rel)),
-				"size" => filesize($root.$rel)
-				];
-		});	
-
-	    $this->persist($index);
-		
-	    return $index;
-	}	
 	
 	public function diff($index)
 	{
@@ -123,7 +104,8 @@ class Index extends Service {
 			elseif (
  				($index[$rel]['size'] != ($size=filesize($root.$rel))) ||
 				($config['check-time'] && ($index[$rel]['time'] != ($time=filemtime($root.$rel)))) ||
-				(!$config['check-time'] && ($index[$rel]['crc']  != ($crc = md5(file_get_contents($root.$rel))))) 
+				($config['check-size'] && ($index[$rel]['size'] != ($size=filesize($root.$rel)))) ||
+				(!($config['check-time']||$config['check-size']) && ($index[$rel]['crc']  != ($crc = md5(file_get_contents($root.$rel))))) 
 				)
 			{
 				$stats->add(Stats::CHANGED);
@@ -138,6 +120,34 @@ class Index extends Service {
 		  
 		return $diffs;
 	
+	}
+	
+	public function compare($workingIndex, $index){
+		
+		$stats = $this->app['stats'];
+		
+		$config = $this->app['config'];
+		
+		$diff = [];
+		
+		foreach($workingIndex as $f=>$v){
+			if(!array_key_exists($f, $index)){
+				$stats->add(Stats::NEWENTRY);
+				$diff[]=$f;
+			} else{
+				$vIndex = $index[$f];
+				if( ($config['check-time'] && ($v['time'] != $vIndex['time'])) ||
+					($config['check-size'] && ($v['size'] != $vIndex['size'])) ||
+					($v['crc']  != $vIndex['crc'])
+				){
+					$stats->add(Stats::CHANGED);
+					$diff[]=$f;
+				}
+			}
+		}
+		
+		return $diff;
+		
 	}
 	
 	public function loadOrLocalBuild(){

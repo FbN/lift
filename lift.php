@@ -13,5 +13,6 @@ $console->add(new Lift\Commands\ResetCommand());
 $console->add(new Lift\Commands\DiffCommand());
 $console->add(new Lift\Commands\BuildCommand());
 $console->add(new Lift\Commands\RemoteResetCommand());
+$console->add(new Lift\Commands\SyncCommand());
 
 $console->run();

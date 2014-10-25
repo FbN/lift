@@ -6,9 +6,13 @@ class Config extends Service {
 	
 	protected $configFile = 'lift.json';
 	
+	protected $defaults = [
+		'check-time' => false,
+		'check-size' => false
+	];
+	
 	public function load()
 	{
-	
 		if(!file_exists($this->configFile)) throw new \RuntimeException("Oi! Config file not found");
 	
 		$config = json_decode(file_get_contents($this->configFile), true);
@@ -23,6 +27,7 @@ class Config extends Service {
 		// input config
 		$config = array_merge
 		(
+				$this->defaults,
 				$config,
 				$this->app['in']->getOptions(),
 				$this->app['in']->getArguments()

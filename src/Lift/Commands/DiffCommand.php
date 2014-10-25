@@ -25,7 +25,13 @@ class DiffCommand extends LiftCommand
    			'list-modified',
         	null,
         	InputOption::VALUE_NONE,
-        	'Changed files');
+        	'Changed files')
+		->addOption(
+				'check-time',
+				null,
+				InputOption::VALUE_NONE,
+				'Lift compare files by md5 checksums. If you can trust your files modification time, you can speedup the upload. Can be used with check-size.'
+		);
 	}
 
 	protected function exe()

@@ -8,13 +8,13 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 
-class UploadCommand extends LiftCommand
+class SyncCommand extends LiftCommand
 {
 	
 	protected function configure()
 	{
 		$this
-		->setName('up')
+		->setName('sync')
 		->setDescription('Sync to server')
 		->addOption(
 				'defaut-host',
@@ -22,10 +22,10 @@ class UploadCommand extends LiftCommand
 				InputOption::VALUE_REQUIRED,
 				'Host name to upload.'
 		)->addOption(
-				'remote-reindex',
+				'remote-index',
 				null,
 				InputOption::VALUE_NONE,
-				'Rebuild the index from remote host.'
+				'Dom\'t trust index. Remote check files status.'
 		)->addOption(
 				'pretend',
 				'p',
@@ -35,18 +35,21 @@ class UploadCommand extends LiftCommand
 				'check-time',
 				null,
 				InputOption::VALUE_NONE,
-				'Lift compare files by md5 checksums. If you can trust your files modification time, you can speedup by skip md5. Can be used with check-size.'
+				'Lift compare files by md5 checksums. If you can trust your files modification time, you can speedup the upload. Can be used with check-size.'
 		)->addOption(
-				'check-size',
-				null,
-				InputOption::VALUE_NONE,
-				'Lift compare files by md5 checksums. If you can assume files with same size are equals, you can speedup by skip md5. Can be used with check-time.'
-		);
+        	'list-new',
+        	null,
+        	InputOption::VALUE_NONE,
+        	'New files')
+        ->addOption(
+   			'list-modified',
+        	null,
+        	InputOption::VALUE_NONE,
+        	'Changed files');
 	}
 
 	protected function exe()
 	{
-		
 		$app = $this->app;
 		$config = $app['config'];
 		
@@ -55,24 +58,31 @@ class UploadCommand extends LiftCommand
 		$remoteService = $app['remoteService'];
 		
 		$index = [];
-		
-		if($config['remote-reindex']) {
-			$index = $remoteService->remoteReindex($this);
-			if(!$app['config']['pretend']){
-				$indexService->persist($remoteService->remoteReindex($this));
-			}	
-		} else {
-			$index = $indexService->getIndex();
-		}
-		
-		if(!$index) $index = [];
+		$diffs = [];
 		
 		$ftp->connect();
-		$index = $ftp->uploadDiff(
-				$index,
-				$indexService->diff($index),
-				$this
-			);		
+		
+		if(!$config['remote-index']) {
+			$index = $indexService->getIndex();
+			if(!$index) $index = [];
+			$index = $ftp->uploadDiff(
+					$index,
+					$diffs=$indexService->diff($index),
+					$this
+			);
+		} else {
+			$index = $indexService->localBuild(false);
+			$diff = $remoteService->remoteDiff($index);
+			$diffs = [];
+			foreach ($diff as $f){
+				$diffs[$f] = $index[$f];
+			}
+			$index = $ftp->uploadDiff(
+					$index,
+					$diffs,
+					$this
+			);
+		}
 		
 		if(!$app['config']['pretend']) $indexService->persist($index);
 		
