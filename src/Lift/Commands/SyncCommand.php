@@ -62,15 +62,7 @@ class SyncCommand extends LiftCommand
 		
 		$ftp->connect();
 		
-		if(!$config['remote-index']) {
-			$index = $indexService->getIndex();
-			if(!$index) $index = [];
-			$index = $ftp->uploadDiff(
-					$index,
-					$diffs=$indexService->diff($index),
-					$this
-			);
-		} else {
+		if($config['remote-index']) {
 			$index = $indexService->localBuild(false);
 			$diff = $remoteService->remoteDiff($index);
 			$diffs = [];
@@ -80,6 +72,14 @@ class SyncCommand extends LiftCommand
 			$index = $ftp->uploadDiff(
 					$index,
 					$diffs,
+					$this
+			);
+		} else {
+			$index = $indexService->getIndex();
+			if($index===null) $index = [];
+			$index = $ftp->uploadDiff(
+					$index,
+					$diffs=$indexService->diff($index),
 					$this
 			);
 		}

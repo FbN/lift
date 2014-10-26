@@ -4,6 +4,8 @@ namespace Lift\Services;
 
 class Remote extends Service {
 	
+	private $remoteScript = '____lift.php';
+	
 	private $parts = [
 		'vendor/pimple/pimple/src/Pimple/Container.php',
 		'src/Lift/Services/Service.php',
@@ -110,11 +112,11 @@ EOT;
 		return $index;
 	}
 	
-	protected function remoteBatchIndex($batch){
+	protected function remoteBatchIndex($batch, $token){
 		
 		$config = $this->app['config'];
 		$host   = $config['host'];
-		$hosturi = $host['url'].'/_r.php';
+		$hosturi = $host['url'].'/'.$host['remote-script-name'].'?token='.$token;
 
 		// Create the context for the request
 		$context = stream_context_create(array(
@@ -145,6 +147,7 @@ EOT;
 	public function remoteDiff($index){
 		
 		$config = $this->app['config'];
+		$host   = $config['host'];
 		$stats = $this->app['stats'];
 		
 		$stats->reset(Stats::NEWENTRY);
@@ -153,16 +156,39 @@ EOT;
 		$batch = [];
 		$diffs = [];
 		$indexService = $this->app['indexService'];
+		
+		$token = Remote::gen_uuid();
+		
+		/* remote script setup */
+		$hosturi = 'ftp://'.$host['username'] . ":" . $host['password'] . "@" . $host['host'] . $host['folder'] . '/' . $host['remote-script-name'];
+		$options = array('ftp' => array('overwrite' => true));
+		$stream = stream_context_create($options);
+		file_put_contents(
+			$hosturi, 
+			str_replace(
+				'##token##', 
+				$token, 
+				file_get_contents($this->remoteScript)
+				), 
+			0, 
+			$stream
+		);
+		
+		/* batch compare */
 		foreach ($index as $f=>$vals){
 			$batch[$f]=$vals;
 			if(count($batch)>self::BATCHSIZE){				
 				$diffs = array_merge(
 						$diffs, 
-						$indexService->compare($batch, $this->remoteBatchIndex(array_keys($batch)))
+						$indexService->compare($batch, $this->remoteBatchIndex(array_keys($batch), $token))
 				);					
 				$batch=[];
 			}
 		}
+		
+		/* wipe off script */
+		unlink($hosturi, $stream);
+		
 		return $diffs;
 	}
 	
