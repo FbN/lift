@@ -159,11 +159,6 @@ class Index extends Service {
 		
 	}
 	
-	public function loadOrLocalBuild(){
-		$i = $this->getIndex();
-		return $i?$i:$this->localBuild();
-	} 
-	
 	public function getIndex()
 	{	
 		return file_exists($this->getPath())?json_decode(file_get_contents($this->getPath()), true):null;
