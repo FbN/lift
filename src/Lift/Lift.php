@@ -41,10 +41,6 @@ class Lift {
 			return new \Lift\Services\Stats($c);
 		};
 		
-// 		$app['manifest'] = function ($c) {
-// 			return $c['configService']->load();
-// 		};		
-		
 		return $app;
 		
 	}

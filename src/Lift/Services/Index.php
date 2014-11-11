@@ -79,7 +79,8 @@ class Index extends Service {
 
 		$config = $this->app['config'];		
 		
-		$stats = $this->app['stats'];		
+		$stats = $this->app['stats'];
+		$stats->resetFileLog();
 		$stats->reset(Stats::NEWENTRY);
 		$stats->reset(Stats::CHANGED);
 		
@@ -95,6 +96,7 @@ class Index extends Service {
 			if(!isset($index[$rel]))
 			{
 				$stats->add(Stats::NEWENTRY);
+				$stats->addNewFile($rel);
 				$diffs[$rel]= [
 					"time" => filemtime($root.$rel),
 					"crc" => $crc?$crc:md5(file_get_contents($root.$rel)),
@@ -109,6 +111,7 @@ class Index extends Service {
 				)
 			{
 				$stats->add(Stats::CHANGED);
+				$stats->addModFile($rel);
 				$diffs[$rel]= [
 					"time" => filemtime($root.$rel),
 					"crc" => $crc?$crc:md5(file_get_contents($root.$rel)),
@@ -126,6 +129,10 @@ class Index extends Service {
 		
 		$stats = $this->app['stats'];
 		
+		$stats->resetFileLog();
+		$stats->reset(Stats::NEWENTRY);
+		$stats->reset(Stats::CHANGED);
+		
 		$config = $this->app['config'];
 		
 		$diff = [];
@@ -133,6 +140,7 @@ class Index extends Service {
 		foreach($workingIndex as $f=>$v){
 			if(!array_key_exists($f, $index)){
 				$stats->add(Stats::NEWENTRY);
+				$stats->addNewFile($f);
 				$diff[]=$f;
 			} else{
 				$vIndex = $index[$f];
@@ -141,6 +149,7 @@ class Index extends Service {
 					($v['crc']  != $vIndex['crc'])
 				){
 					$stats->add(Stats::CHANGED);
+					$stats->addModFile($f);
 					$diff[]=$f;
 				}
 			}
