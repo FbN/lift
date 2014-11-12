@@ -1,5 +1,4 @@
 #lift
-====
 
 ## What and Why
 
@@ -14,7 +13,7 @@ If this is the scene and your project it's fat, keeping the server in sync can b
 Lift can speed up your "old school" project deployment by keeping a local index of remote files status. 
 When the local index is not trustable (remote files changed by other way ecc.) Lift can rescan remote server using a PHP script with great time benefits.
 
-## Usage
+## Install and Configure
 
 ### Download the phar on your project root
 
@@ -99,6 +98,39 @@ _inc.
 Will ignore any file path containing '_inc.'
 
 N.B. By file path Lift assume an absolute path starting from your project root.
+
+## Use it
+
+Simply run
+
+```
+> php lift.phar sync --remote-index
+```
+
+Lift will reindex the remote FTP server content uploading a tempory PHP script and than will upload only the changed files. The remote indexing is not necessary every time. If you are sure noone have changed the remote files afer your last sync you can run it withoute the "--remote-index" option getting a better performance.
+
+Other options upported are:
+
+```
+ --defaut-host (-H)    Host name to upload.
+ --remote-index        Dom't trust index. Remote check files status.
+ --pretend (-p)        Pretend, do nothing.
+ --check-time          Lift compare files by md5 checksums. If you can trust your files modification time, you can                           speedup the upload. Can be used with check-size.
+ --list-new            New files
+ --list-modified       Changed files
+```
+
+## License
+MIT License http://opensource.org/licenses/MIT
+
+## The End
+Lift is in embrional status. It seems to work but a lot of work can be done do improve It. So star the page and keep an eye on it :).
+
+Fabiano Taioli
+ftaioli@gmail.com
+
+
+
 
 
 
