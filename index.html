@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <title>Lift by FbN</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>Lift</h1>
+        <h2>PHP script for quick file sync with FTP server.</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/FbN/lift/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/FbN/lift/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/FbN/lift" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h1>
+<a id="lift" class="anchor" href="#lift" aria-hidden="true"><span class="octicon octicon-link"></span></a>lift</h1>
+
+<h2>
+<a id="what-and-why" class="anchor" href="#what-and-why" aria-hidden="true"><span class="octicon octicon-link"></span></a>What and Why</h2>
+
+<p>PHP script for quick sync with FTP server.</p>
+
+<p>The world is full of wonderfull tecnology that helps you deploy your project in marvelous ways: ssh tools, cloud API, docker, git deploy, bla bla bla. </p>
+
+<p>Unfortunately happens that you are stuck with an prehistoric shared PHP/MYSQL server that can offer you only FTP access.</p>
+
+<p>If this is the scene and your project it's fat, keeping the server in sync can be very tedious. Well, FTP clients come in your help with tools to compare files before update but the process can be very slow (especially if you play with composer and your file date/time mod time is not trustable).</p>
+
+<p>Lift can speed up your "old school" project deployment by keeping a local index of remote files status. 
+When the local index is not trustable (remote files changed by other way ecc.) Lift can rescan remote server using a PHP script with great time benefits.</p>
+
+<h2>
+<a id="install-and-configure" class="anchor" href="#install-and-configure" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install and Configure</h2>
+
+<h3>
+<a id="download-the-phar-on-your-project-root" class="anchor" href="#download-the-phar-on-your-project-root" aria-hidden="true"><span class="octicon octicon-link"></span></a>Download the phar on your project root</h3>
+
+<p>Download from this url: <a href="https://github.com/FbN/lift/raw/master/lift.phar">https://github.com/FbN/lift/raw/master/lift.phar</a> and save it in your project root</p>
+
+<pre><code>myproject&gt; curl -O https://github.com/FbN/lift/raw/master/lift.phar
+</code></pre>
+
+<h3>
+<a id="test-it" class="anchor" href="#test-it" aria-hidden="true"><span class="octicon octicon-link"></span></a>Test it</h3>
+
+<pre><code>myproject&gt; php lift.phar
+</code></pre>
+
+<p>If all is working you will see the lift help.</p>
+
+<h3>
+<a id="configure" class="anchor" href="#configure" aria-hidden="true"><span class="octicon octicon-link"></span></a>Configure</h3>
+
+<p>Now you have Lift ready for use but first you have to configure it.</p>
+
+<p>Create a json file named lift.json in your project root</p>
+
+<pre><code>&gt; vi lift.json
+</code></pre>
+
+<p>Copy this json and edit it to feet your server and needs</p>
+
+<div class="highlight highlight-javascript"><pre>{
+    <span class="pl-s1"><span class="pl-pds">"</span>hosts<span class="pl-pds">"</span></span><span class="pl-ko">:</span> {
+        <span class="pl-s1"><span class="pl-pds">"</span>prod<span class="pl-pds">"</span></span><span class="pl-ko">:</span> {
+            <span class="pl-s1"><span class="pl-pds">"</span>host<span class="pl-pds">"</span></span><span class="pl-ko">:</span> <span class="pl-s1"><span class="pl-pds">"</span>mybudgetphpserver.com<span class="pl-pds">"</span></span>,
+            <span class="pl-s1"><span class="pl-pds">"</span>username<span class="pl-pds">"</span></span><span class="pl-ko">:</span> <span class="pl-s1"><span class="pl-pds">"</span>myftpuser<span class="pl-pds">"</span></span>,
+            <span class="pl-s1"><span class="pl-pds">"</span>password<span class="pl-pds">"</span></span><span class="pl-ko">:</span> <span class="pl-s1"><span class="pl-pds">"</span>myftppassword<span class="pl-pds">"</span></span>,
+            <span class="pl-s1"><span class="pl-pds">"</span>folder<span class="pl-pds">"</span></span><span class="pl-ko">:</span> <span class="pl-s1"><span class="pl-pds">"</span>/httpdocs<span class="pl-pds">"</span></span>,
+            <span class="pl-s1"><span class="pl-pds">"</span>url<span class="pl-pds">"</span></span><span class="pl-ko">:</span> <span class="pl-s1"><span class="pl-pds">"</span>http://mybudgetphpserver.com<span class="pl-pds">"</span></span>,
+            <span class="pl-s1"><span class="pl-pds">"</span>remote-script-name<span class="pl-pds">"</span></span><span class="pl-ko">:</span> <span class="pl-s1"><span class="pl-pds">"</span>_r.php<span class="pl-pds">"</span></span>
+        },
+        <span class="pl-s1"><span class="pl-pds">"</span>staging<span class="pl-pds">"</span></span><span class="pl-ko">:</span> {
+            <span class="pl-s1"><span class="pl-pds">"</span>host<span class="pl-pds">"</span></span><span class="pl-ko">:</span> <span class="pl-s1"><span class="pl-pds">"</span>192.168.1.1<span class="pl-pds">"</span></span>,
+            <span class="pl-s1"><span class="pl-pds">"</span>username<span class="pl-pds">"</span></span><span class="pl-ko">:</span> <span class="pl-s1"><span class="pl-pds">"</span>myftpuser<span class="pl-pds">"</span></span>,
+            <span class="pl-s1"><span class="pl-pds">"</span>password<span class="pl-pds">"</span></span><span class="pl-ko">:</span> <span class="pl-s1"><span class="pl-pds">"</span>myftppassword<span class="pl-pds">"</span></span>,
+            <span class="pl-s1"><span class="pl-pds">"</span>folder<span class="pl-pds">"</span></span><span class="pl-ko">:</span> <span class="pl-s1"><span class="pl-pds">"</span>/httpdocs<span class="pl-pds">"</span></span>,
+            <span class="pl-s1"><span class="pl-pds">"</span>url<span class="pl-pds">"</span></span><span class="pl-ko">:</span> <span class="pl-s1"><span class="pl-pds">"</span>http://testserver.lan<span class="pl-pds">"</span></span>,
+            <span class="pl-s1"><span class="pl-pds">"</span>remote-script-name<span class="pl-pds">"</span></span><span class="pl-ko">:</span> <span class="pl-s1"><span class="pl-pds">"</span>_r.php<span class="pl-pds">"</span></span>
+        }
+    },
+    <span class="pl-s1"><span class="pl-pds">"</span>defaut-host<span class="pl-pds">"</span></span><span class="pl-ko">:</span> <span class="pl-s1"><span class="pl-pds">"</span>prod<span class="pl-pds">"</span></span>,
+    <span class="pl-s1"><span class="pl-pds">"</span>ignore<span class="pl-pds">"</span></span><span class="pl-ko">:</span> [
+        <span class="pl-s1"><span class="pl-pds">"</span>/.<span class="pl-pds">"</span></span>,
+        <span class="pl-s1"><span class="pl-pds">"</span>^/lift.<span class="pl-pds">"</span></span>
+        <span class="pl-s1"><span class="pl-pds">"</span>^/composer.<span class="pl-pds">"</span></span>
+    ]
+}</pre></div>
+
+<p>In this JSON sample we have declared two servers to sync. When you call lift if you not specify the server to use it will choose the one specified in by "default-host" options.</p>
+
+<p>Server configuration is obvious (host, login, password bla bla bla). In "folder" you have to specify the web root folder, typically is "/httpdocs". </p>
+
+<p>"remote-script-name" is the name Lift give to the script it upload for remote scan. It will uploaded, called prefixing it with the url you write on "url" and than delete it.</p>
+
+<p>Last there is the ignore section. There you configure rules to ignore files that not must be uploaded.</p>
+
+<p>The rules are very simple, by examples:</p>
+
+<pre><code>^/lift.
+</code></pre>
+
+<p>Ignore any file path starting with "/lift.". So a file named "lift.json" or "lift.phar" in your project root will be ignored.</p>
+
+<pre><code>.tmp$
+</code></pre>
+
+<p>Will ignore any file path ending with ".tmp"</p>
+
+<pre><code>_inc.
+</code></pre>
+
+<p>Will ignore any file path containing '_inc.'</p>
+
+<p>N.B. By file path Lift assume an absolute path starting from your project root.</p>
+
+<h2>
+<a id="use-it" class="anchor" href="#use-it" aria-hidden="true"><span class="octicon octicon-link"></span></a>Use it</h2>
+
+<p>Simply run</p>
+
+<pre><code>&gt; php lift.phar sync --remote-index
+</code></pre>
+
+<p>Lift will reindex the remote FTP server content uploading a tempory PHP script and than will upload only the changed files. The remote indexing is not necessary every time. If you are sure noone have changed the remote files afer your last sync you can run it withoute the "--remote-index" option getting a better performance.</p>
+
+<p>Other options upported are:</p>
+
+<pre><code> --defaut-host (-H)    Host name to upload.
+ --remote-index        Dom't trust index. Remote check files status.
+ --pretend (-p)        Pretend, do nothing.
+ --check-time          Lift compare files by md5 checksums. If you can trust your files modification time, you can                           speedup the upload. Can be used with check-size.
+ --list-new            New files
+ --list-modified       Changed files
+</code></pre>
+
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h2>
+
+<p>MIT License <a href="http://opensource.org/licenses/MIT">http://opensource.org/licenses/MIT</a></p>
+
+<h2>
+<a id="the-end" class="anchor" href="#the-end" aria-hidden="true"><span class="octicon octicon-link"></span></a>The End</h2>
+
+<p>Lift is in embrional status. It seems to work but a lot of work can be done do improve It. So star the page and keep an eye on it :).</p>
+
+<p>Fabiano Taioli
+<a href="mailto:ftaioli@gmail.com">ftaioli@gmail.com</a></p>
+      </section>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-56705715-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
