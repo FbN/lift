@@ -3,5 +3,5 @@ vendor
 .project
 .settings
 composer.lock
+composer.phar
 lift.lock
-lift.phar
